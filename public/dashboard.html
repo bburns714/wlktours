@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — WLK Tours Proposal Studio</title>
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <div class="topnav">
+    <a href="/admin" class="brand">
+      <div>
+        <div class="brand-mark">WLK<span>TOURS</span></div>
+        <span class="brand-sub">Proposal Studio</span>
+      </div>
+    </a>
+    <div class="navtabs">
+      <a href="/request" target="_blank" class="navtab">Lead Form ↗</a>
+      <a href="/admin" class="navtab active">Dashboard</a>
+      <span class="navtab" id="logout-btn" style="cursor:pointer;">Sign out</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Internal</div>
+      <h1>Dashboard</h1>
+      <p>Incoming leads and saved proposals in one place.</p>
+    </div>
+
+    <div class="tabbar">
+      <div class="tabbtn active" data-tab="leads" id="tab-leads">Leads</div>
+      <div class="tabbtn" data-tab="proposals" id="tab-proposals">Proposals</div>
+    </div>
+
+    <div id="dash-body"><div class="loading-note">Loading…</div></div>
+  </div>
+
+  <script src="/assets/js/helpers.js"></script>
+  <script src="/assets/js/dashboard.js"></script>
+</body>
+</html>

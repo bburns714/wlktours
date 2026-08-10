@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — WLK Tours Proposal Studio</title>
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark" style="color:var(--navy);">WLK<span>TOURS</span></div>
+        <span class="brand-sub" style="color:var(--slate);">Proposal Studio</span>
+      </div>
+      <form id="login-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required autofocus>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required>
+        </div>
+        <div class="error-note" id="login-error" style="display:none;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/js/helpers.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const errEl = document.getElementById('login-error');
+      errEl.style.display = 'none';
+      const btn = form.querySelector('button');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      const fd = new FormData(form);
+      try{
+        await api('POST', '/api/auth/login', { email: fd.get('email'), password: fd.get('password') });
+        window.location.href = '/admin';
+      }catch(err){
+        errEl.textContent = err.message || 'Sign in failed.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    });
+  </script>
+</body>
+</html>

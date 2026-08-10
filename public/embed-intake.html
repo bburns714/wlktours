@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Proposal — WLK Tours</title>
+<link rel="stylesheet" href="/assets/css/styles.css">
+<style>
+  /* Embed variant: no nav, transparent-ish, sized to fit an iframe */
+  body{background:transparent;}
+  .embed-wrap{padding:0;max-width:100%;}
+  .card{margin-bottom:0;}
+</style>
+</head>
+<body>
+  <div class="container narrow embed-wrap">
+    <div class="card" id="intake-card"></div>
+  </div>
+
+  <script src="/assets/js/helpers.js"></script>
+  <script>
+    function formHtml(){
+      return `
+        <form id="intake-form">
+          <div class="grid2">
+            <div class="field">
+              <label>Full name *</label>
+              <input type="text" name="name" required placeholder="Jamie Rivera">
+            </div>
+            <div class="field">
+              <label>Email *</label>
+              <input type="email" name="email" required placeholder="jamie@example.com">
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label>Phone</label>
+              <input type="tel" name="phone" placeholder="(555) 555-0123">
+            </div>
+            <div class="field">
+              <label>Organization</label>
+              <input type="text" name="company" placeholder="City of Salem Visitor Bureau">
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label>Organization type</label>
+              <select name="orgType">
+                <option>Tourism Organization</option>
+                <option>Hotel &amp; Resort</option>
+                <option>Destination Manager / DMC</option>
+                <option>Historic Site or Museum</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Target launch date</label>
+              <input type="date" name="targetDate">
+            </div>
+          </div>
+          <div class="field">
+            <label>What are you hoping to build?</label>
+            <textarea name="message" placeholder="e.g. A self-guided historic walking tour covering downtown, 6–8 stops, launching before summer season."></textarea>
+          </div>
+          <div class="btn-row" style="margin-top:6px;">
+            <button type="submit" class="btn btn-primary">Submit request</button>
+            <span style="font-size:12px;color:var(--slate);">We'll never share your info.</span>
+          </div>
+          <div class="error-note" id="form-error" style="display:none;"></div>
+        </form>
+      `;
+    }
+
+    function mount(){
+      const card = document.getElementById('intake-card');
+      card.innerHTML = formHtml();
+      const form = document.getElementById('intake-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type=submit]');
+        const errEl = document.getElementById('form-error');
+        errEl.style.display = 'none';
+        btn.disabled = true;
+        btn.textContent = 'Submitting…';
+        const fd = new FormData(form);
+        const payload = {
+          name: fd.get('name').trim(),
+          email: fd.get('email').trim(),
+          phone: fd.get('phone').trim(),
+          company: fd.get('company').trim(),
+          orgType: fd.get('orgType'),
+          targetDate: fd.get('targetDate'),
+          message: fd.get('message').trim(),
+          source: 'landing-page-embed'
+        };
+        try{
+          await api('POST', '/api/leads', payload);
+          card.innerHTML = `
+            <div class="success-box">
+              <div class="success-mark">&check;</div>
+              <h2 style="font-size:20px;margin-bottom:8px;">Thanks, ${esc(payload.name.split(' ')[0] || '')}.</h2>
+              <p style="color:var(--slate);max-width:400px;margin:0 auto;">We've received your request and will follow up shortly with a custom proposal.</p>
+            </div>
+          `;
+          // Let the parent page (if embedded) know submission succeeded, and resize.
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'wlktours-lead-submitted' }, '*');
+          }
+        }catch(err){
+          errEl.textContent = err.message || 'Something went wrong. Please try again.';
+          errEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Submit request';
+        }
+      });
+    }
+    mount();
+  </script>
+</body>
+</html>

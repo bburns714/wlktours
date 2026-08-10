@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Proposal — WLK Tours</title>
+<link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <div class="topnav">
+    <div class="brand">
+      <div>
+        <div class="brand-mark">WLK<span>TOURS</span></div>
+        <span class="brand-sub">Proposal Studio</span>
+      </div>
+    </div>
+  </div>
+  <div class="container narrow">
+    <div class="page-head">
+      <div class="eyebrow">Request a Proposal</div>
+      <h1>Tell us about your destination.</h1>
+      <p>Share a few details about your organization and what you're looking for. Our team will follow up with a custom walking tour proposal — usually within one business day.</p>
+    </div>
+    <iframe src="/embed/intake" title="Request a proposal" style="width:100%;border:0;min-height:640px;" id="intake-frame"></iframe>
+  </div>
+  <script>
+    // Grow the iframe to fit its content (simple same-origin resize).
+    window.addEventListener('load', () => {
+      const frame = document.getElementById('intake-frame');
+      try{
+        const resize = () => {
+          const doc = frame.contentDocument;
+          if(doc) frame.style.height = doc.body.scrollHeight + 40 + 'px';
+        };
+        frame.addEventListener('load', resize);
+        setInterval(resize, 500);
+      }catch(e){}
+    });
+  </script>
+</body>
+</html>
