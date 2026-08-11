@@ -20,6 +20,8 @@ function serialize(row) {
     location: row.location,
     groupSize: row.group_size,
     mapEmbed: row.map_embed,
+    headerImage: row.header_image,
+    contentBlocks: JSON.parse(row.content_blocks || '[]'),
     items: JSON.parse(row.items_json || '[]'),
     taxPercent: row.tax_percent,
     notes: row.notes,
@@ -111,7 +113,7 @@ router.put('/:id', requireAuth, (req, res) => {
   db.prepare(`
     UPDATE proposals SET
       title = ?, description = ?, client_name = ?, client_company = ?, client_email = ?, client_phone = ?,
-      event_date = ?, location = ?, group_size = ?, map_embed = ?, items_json = ?, tax_percent = ?,
+      event_date = ?, location = ?, group_size = ?, map_embed = ?, header_image = ?, content_blocks = ?, items_json = ?, tax_percent = ?,
       notes = ?, status = ?, updated_at = datetime('now')
     WHERE id = ?
   `).run(
@@ -125,6 +127,8 @@ router.put('/:id', requireAuth, (req, res) => {
     b.location || '',
     b.groupSize || '',
     b.mapEmbed || '',
+    b.headerImage || '',
+    JSON.stringify(b.contentBlocks || []),
     JSON.stringify(b.items || []),
     Number(b.taxPercent) || 0,
     b.notes || '',

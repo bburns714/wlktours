@@ -55,6 +55,27 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_proposals_lead ON proposals(lead_id);
+
+  CREATE TABLE IF NOT EXISTS images (
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    original_name TEXT,
+    mime_type TEXT,
+    size INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
+
+// Migration: add header_image to proposals if this DB predates the column.
+const proposalCols = db.prepare("PRAGMA table_info(proposals)").all().map(c => c.name);
+if (!proposalCols.includes('header_image')) {
+  db.exec('ALTER TABLE proposals ADD COLUMN header_image TEXT');
+}
+// Migration: add content_blocks — an ordered JSON array of flexible content
+// blocks (map embed, text, list, cards, gallery, quote, divider) shown
+// between Overview and the Estimate on the client-facing proposal.
+if (!proposalCols.includes('content_blocks')) {
+  db.exec("ALTER TABLE proposals ADD COLUMN content_blocks TEXT NOT NULL DEFAULT '[]'");
+}
 
 module.exports = db;

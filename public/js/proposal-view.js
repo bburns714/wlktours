@@ -17,11 +17,85 @@ async function load(){
   }
 }
 
+function renderBlock(block){
+  const d = block.data || {};
+  switch(block.type){
+    case 'map_embed': {
+      const src = mapSrcFromEmbed(d.embedCode);
+      return src ? `<div class="map-embed"><iframe src="${esc(src)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>` : '';
+    }
+    case 'text': {
+      if(!d.heading && !d.body) return '';
+      const alignStyle = d.align === 'center' ? 'text-align:center;' : '';
+      const sizeClass = d.size === 'large' ? ' block-text-large' : '';
+      return `
+        <div class="card block-text${sizeClass}" style="${alignStyle}">
+          ${d.heading ? `<h2 style="margin-bottom:10px;">${esc(d.heading)}</h2>` : ''}
+          ${d.body ? `<p style="white-space:pre-wrap;color:var(--ink);">${esc(d.body)}</p>` : ''}
+        </div>
+      `;
+    }
+    case 'list': {
+      const items = (d.items || []).filter(Boolean);
+      if(!items.length) return '';
+      const tag = d.style === 'number' ? 'ol' : 'ul';
+      const cls = d.style === 'check' ? 'prop-list prop-list-check' : 'prop-list';
+      return `
+        <div class="card">
+          <${tag} class="${cls}">
+            ${items.map(it => `<li>${esc(it)}</li>`).join('')}
+          </${tag}>
+        </div>
+      `;
+    }
+    case 'cards': {
+      const cards = (d.cards || []).filter(c => c.title || c.body);
+      if(!cards.length) return '';
+      return `
+        <div class="prop-cards-grid">
+          ${cards.map(c => `
+            <div class="prop-card">
+              ${c.title ? `<h3>${esc(c.title)}</h3>` : ''}
+              ${c.body ? `<p>${esc(c.body)}</p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    case 'gallery': {
+      const urls = d.urls || [];
+      if(!urls.length) return '';
+      return `<div class="prop-gallery">${urls.map(u => `<img src="${esc(u)}" alt="">`).join('')}</div>`;
+    }
+    case 'quote': {
+      if(!d.text) return '';
+      return `
+        <div class="prop-quote">
+          <p>&ldquo;${esc(d.text)}&rdquo;</p>
+          ${d.attribution ? `<div class="prop-quote-attr">${esc(d.attribution)}</div>` : ''}
+        </div>
+      `;
+    }
+    case 'divider':
+      return `<div class="prop-divider"></div>`;
+    default:
+      return '';
+  }
+}
+
 function paint(){
   const p = PROPOSAL;
   const totals = computeTotals(p.items, p.taxPercent);
   const mapSrc = mapSrcFromEmbed(p.mapEmbed);
   const root = document.getElementById('view-root');
+
+  // Blocks are the source of truth once a proposal has been saved in the
+  // new editor. For older proposals that haven't been reopened yet, fall
+  // back to the legacy single map field so nothing appears to disappear.
+  const blocks = (p.contentBlocks && p.contentBlocks.length)
+    ? p.contentBlocks
+    : (mapSrc ? [{ type: 'map_embed', data: { embedCode: p.mapEmbed } }] : []);
+  const blocksHtml = blocks.map(renderBlock).join('');
 
   root.innerHTML = `
     <div class="prop-header">
@@ -40,6 +114,8 @@ function paint(){
     </div>
 
     <div class="container">
+      ${p.headerImage ? `<div class="prop-header-image"><img src="${esc(p.headerImage)}" alt=""></div>` : ''}
+
       ${p.description ? `<div class="card"><h2 style="margin-bottom:10px;">Overview</h2><p style="color:var(--ink);white-space:pre-wrap;">${esc(p.description)}</p></div>` : ''}
 
       ${(p.eventDate || p.location || p.groupSize) ? `
@@ -50,7 +126,7 @@ function paint(){
         </div>
       ` : ''}
 
-      ${mapSrc ? `<div class="map-embed"><iframe src="${esc(mapSrc)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>` : ''}
+      ${blocksHtml}
 
       <div class="card">
         <h2 style="margin-bottom:4px;">Estimate</h2>
