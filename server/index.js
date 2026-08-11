@@ -12,6 +12,13 @@ const proposalRoutes = require('./routes/proposals');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Railway (like Heroku/Render) terminates HTTPS at its edge and forwards
+// requests to this app over plain HTTP, adding an X-Forwarded-Proto header.
+// Without this, Express sees every request as insecure, and express-session
+// silently refuses to ever set our secure:true session cookie in production
+// — login succeeds but no Set-Cookie header is ever sent.
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
