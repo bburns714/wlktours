@@ -8,6 +8,8 @@ const { requireAuth } = require('./auth-middleware');
 const authRoutes = require('./routes/auth');
 const leadRoutes = require('./routes/leads');
 const proposalRoutes = require('./routes/proposals');
+const imageRoutes = require('./routes/images');
+const { UPLOADS_DIR } = require('./uploads-dir');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,11 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/proposals', proposalRoutes);
+app.use('/api/images', imageRoutes);
+
+// ---------- Uploaded images (header images etc.) ----------
+// Public (no auth) — proposal pages that embed these are themselves public.
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // ---------- Static assets (css/js shared across pages) ----------
 app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
