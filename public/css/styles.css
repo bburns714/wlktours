@@ -252,6 +252,86 @@ table.list tr:last-child td{border-bottom:none;}
 
 .prop-divider{border-top:1px solid var(--line);margin:8px 0 24px;}
 
+/* ==================== Premium public proposal page ==================== */
+
+.prop-notfound{min-height:100vh;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;}
+.prop-notfound p{color:rgba(255,255,255,0.7);max-width:360px;}
+
+/* ---------- Hero ---------- */
+.prop-hero{
+  background:linear-gradient(180deg, rgba(15,39,51,0.55), rgba(15,39,51,0.92)), radial-gradient(circle at 30% 20%, #1a3d47, var(--navy) 70%);
+  background-size:cover;background-position:center;
+  color:#fff;padding:60px 24px 90px;text-align:center;
+}
+.prop-hero-inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.prop-hero .brand-mark{font-size:22px;margin-bottom:34px;}
+.prop-hero-eyebrow{font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px;}
+.prop-hero-title{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);font-weight:600;line-height:1.15;color:#fff;margin:0 0 18px;}
+.prop-hero-sub{font-size:16px;color:rgba(255,255,255,0.75);max-width:480px;margin:0 0 30px;line-height:1.6;}
+.btn-hero{
+  display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:14px;
+  padding:14px 30px;border-radius:999px;text-decoration:none;transition:transform .15s ease, box-shadow .15s ease;
+  box-shadow:0 8px 24px rgba(201,138,59,0.35);
+}
+.btn-hero:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(201,138,59,0.45);}
+
+/* ---------- Prepared-for card (overlaps hero) ---------- */
+.prop-prepared-card{
+  background:#fff;border-radius:var(--radius);box-shadow:0 12px 40px rgba(15,39,51,0.16);
+  padding:28px 32px;margin:-56px 0 40px;position:relative;z-index:2;
+}
+.prop-prepared-label{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:10px;}
+.prop-prepared-name{font-family:var(--font-display);font-size:22px;color:var(--navy);font-weight:600;}
+.prop-prepared-org{color:var(--slate);font-size:13.5px;margin-top:2px;}
+.prop-prepared-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);}
+.prop-prepared-grid div{font-size:13.5px;color:var(--ink);}
+.prop-prepared-grid b{display:block;font-size:10px;letter-spacing:0.6px;text-transform:uppercase;color:var(--slate);font-weight:700;margin-bottom:3px;}
+
+/* ---------- Section pattern ---------- */
+.prop-section{margin-bottom:36px;}
+.section-head{text-align:center;margin-bottom:20px;}
+.section-head .eyebrow{justify-content:center;}
+.section-head h2{font-size:24px;}
+.prop-overview-text{font-size:15.5px;color:var(--ink);line-height:1.75;white-space:pre-wrap;text-align:center;max-width:620px;margin:0 auto;}
+
+/* ---------- Pricing table ---------- */
+.pricing-table{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.pricing-head{display:grid;grid-template-columns:34px 1fr 60px 110px 110px;background:var(--navy);color:rgba(255,255,255,0.85);font-size:11px;letter-spacing:0.6px;text-transform:uppercase;font-weight:700;padding:14px 20px;gap:8px;}
+.pricing-row{display:grid;grid-template-columns:34px 1fr 60px 110px 110px;padding:14px 20px;gap:8px;border-bottom:1px solid var(--line);align-items:center;font-size:13.5px;}
+.pricing-row:last-of-type{border-bottom:none;}
+.pricing-num{color:var(--slate);font-family:var(--font-mono);font-size:12px;}
+.pricing-desc{color:var(--ink);font-weight:500;}
+.pricing-qty,.pricing-unit{font-family:var(--font-mono);color:var(--slate);}
+.pricing-amt{font-family:var(--font-mono);font-weight:700;color:var(--navy);text-align:right;}
+.pricing-totals{padding:18px 20px;background:var(--mist);}
+.pricing-totals-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--slate);padding:4px 0;}
+.pricing-totals-row.grand{font-size:17px;font-weight:700;color:var(--navy);padding-top:10px;margin-top:6px;border-top:1px solid var(--mist-2);}
+.prop-notes{font-size:13px;color:var(--slate);margin-top:14px;white-space:pre-wrap;}
+
+/* ---------- Accept section ---------- */
+.prop-accept-section{background:var(--mist);border-radius:var(--radius);padding:36px 32px;}
+.accept-intro{text-align:center;color:var(--slate);font-size:14.5px;max-width:480px;margin:0 auto 22px;}
+.accept-form{max-width:520px;margin:0 auto;}
+.accept-decided{text-align:center;font-size:16px;font-weight:700;padding:20px;border-radius:8px;}
+.accept-decided.accepted{color:var(--teal-dark);background:#fff;}
+.accept-decided.declined{color:var(--danger);background:#fff;}
+.prop-contact-row{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;margin-top:26px;padding-top:22px;border-top:1px solid var(--mist-2);font-size:13px;color:var(--slate);}
+.prop-contact-row b{color:var(--navy);margin-right:4px;}
+
+/* ---------- Footer ---------- */
+.prop-footer{background:var(--navy);color:rgba(255,255,255,0.5);padding:36px 24px;text-align:center;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.prop-footer .brand-mark{font-size:16px;}
+
+@media print{
+  .prop-hero{background:#fff !important;color:var(--navy) !important;padding:0 0 20px;text-align:left;}
+  .prop-hero-title,.prop-hero-eyebrow{color:var(--navy) !important;}
+  .prop-hero .brand-mark,.prop-hero .brand-mark span{color:var(--navy) !important;}
+  .prop-hero-sub{color:var(--slate) !important;}
+  .prop-prepared-card{box-shadow:none !important;margin-top:16px;border:1px solid var(--line);}
+  .pricing-head{background:var(--mist) !important;color:var(--navy) !important;}
+  .prop-footer{background:#fff !important;color:var(--slate) !important;}
+}
+
 /* ---------- Login ---------- */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:20px;}
 .login-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:36px;width:100%;max-width:380px;}

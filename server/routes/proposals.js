@@ -26,6 +26,8 @@ function serialize(row) {
     taxPercent: row.tax_percent,
     notes: row.notes,
     status: row.status,
+    acceptedByName: row.accepted_by_name,
+    acceptedByEmail: row.accepted_by_email,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -155,13 +157,19 @@ router.get('/public/:id', (req, res) => {
 });
 
 router.post('/public/:id/respond', (req, res) => {
-  const { status } = req.body;
+  const { status, name, email } = req.body;
   if (!['accepted', 'declined'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status.' });
   }
+  if (status === 'accepted' && (!name || !name.trim() || !email || !email.trim())) {
+    return res.status(400).json({ error: 'Please enter your name and email to accept.' });
+  }
   const row = db.prepare('SELECT id FROM proposals WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Proposal not found.' });
-  db.prepare(`UPDATE proposals SET status = ?, updated_at = datetime('now') WHERE id = ?`).run(status, req.params.id);
+  db.prepare(`
+    UPDATE proposals SET status = ?, accepted_by_name = ?, accepted_by_email = ?, updated_at = datetime('now')
+    WHERE id = ?
+  `).run(status, status === 'accepted' ? name.trim() : null, status === 'accepted' ? email.trim() : null, req.params.id);
   res.json({ ok: true });
 });
 

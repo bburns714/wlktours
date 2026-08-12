@@ -77,5 +77,14 @@ if (!proposalCols.includes('header_image')) {
 if (!proposalCols.includes('content_blocks')) {
   db.exec("ALTER TABLE proposals ADD COLUMN content_blocks TEXT NOT NULL DEFAULT '[]'");
 }
+// Migration: capture who actually clicked Accept, for the client-facing
+// accept form (name + email fields), separate from the original clientName/
+// clientEmail on the proposal (which may have been filled in by staff).
+if (!proposalCols.includes('accepted_by_name')) {
+  db.exec('ALTER TABLE proposals ADD COLUMN accepted_by_name TEXT');
+}
+if (!proposalCols.includes('accepted_by_email')) {
+  db.exec('ALTER TABLE proposals ADD COLUMN accepted_by_email TEXT');
+}
 
 module.exports = db;

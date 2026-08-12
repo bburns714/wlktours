@@ -8,11 +8,9 @@ async function load(){
     paint();
   }catch(err){
     root.innerHTML = `
-      <div class="container narrow">
-        <div class="card empty-state">
-          <div class="em-icon">🔎</div>
-          We couldn't find this proposal. The link may be incorrect or the proposal may have been removed.
-        </div>
+      <div class="prop-notfound">
+        <div class="brand-mark">WLK<span>TOURS</span></div>
+        <p>We couldn't find this proposal. The link may be incorrect or the proposal may have been removed.</p>
       </div>`;
   }
 }
@@ -22,7 +20,16 @@ function renderBlock(block){
   switch(block.type){
     case 'map_embed': {
       const src = mapSrcFromEmbed(d.embedCode);
-      return src ? `<div class="map-embed"><iframe src="${esc(src)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>` : '';
+      if(!src) return '';
+      return `
+        <section class="prop-section">
+          <div class="section-head">
+            <div class="eyebrow">The Route</div>
+            <h2>Mapped for Your Group</h2>
+          </div>
+          <div class="map-embed"><iframe src="${esc(src)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+        </section>
+      `;
     }
     case 'text': {
       if(!d.heading && !d.body) return '';
@@ -90,104 +97,165 @@ function paint(){
   const root = document.getElementById('view-root');
 
   // Blocks are the source of truth once a proposal has been saved in the
-  // new editor. For older proposals that haven't been reopened yet, fall
-  // back to the legacy single map field so nothing appears to disappear.
+  // current editor. For older proposals that haven't been reopened yet,
+  // fall back to the legacy single map field so nothing disappears.
   const blocks = (p.contentBlocks && p.contentBlocks.length)
     ? p.contentBlocks
     : (mapSrc ? [{ type: 'map_embed', data: { embedCode: p.mapEmbed } }] : []);
-  const blocksHtml = blocks.map(renderBlock).join('');
+
+  // Pull the map block out to render in its own full-width "Route" section
+  // (matching the reference layout); everything else renders inline in order.
+  const mapBlock = blocks.find(b => b.type === 'map_embed' && mapSrcFromEmbed((b.data||{}).embedCode));
+  const otherBlocksHtml = blocks.filter(b => b !== mapBlock).map(renderBlock).join('');
+  const mapBlockHtml = mapBlock ? renderBlock(mapBlock) : '';
+
+  const isDecided = p.status === 'accepted' || p.status === 'declined';
+  const heroBg = p.headerImage ? `background-image:linear-gradient(180deg, rgba(15,39,51,0.55), rgba(15,39,51,0.92)), url('${esc(p.headerImage)}');` : '';
 
   root.innerHTML = `
-    <div class="prop-header">
-      <div class="prop-header-inner">
+    <header class="prop-hero" style="${heroBg}">
+      <div class="prop-hero-inner">
         <div class="brand-mark">WLK<span>TOURS</span></div>
-        <div class="prop-meta-row">
-          <div class="prop-title">${esc(p.title || 'Walking Tour Proposal')}</div>
-          <div class="prop-for">
-            Prepared for
-            <strong>${esc(p.clientName || p.clientCompany || 'you')}</strong>
-            ${p.clientCompany ? esc(p.clientCompany) : ''}
-            <br>${fmtDate(p.updatedAt || p.createdAt)}
-          </div>
+        <div class="prop-hero-eyebrow">A Proposal for ${esc(p.clientCompany || p.clientName || 'You')}</div>
+        <h1 class="prop-hero-title">${esc(p.title || 'Walking Tour Proposal')}</h1>
+        ${p.description ? `<p class="prop-hero-sub">${esc(truncate(p.description, 180))}</p>` : ''}
+        <a href="#accept" class="btn btn-hero">Review &amp; Accept</a>
+      </div>
+    </header>
+
+    <div class="container narrow">
+
+      <div class="prop-prepared-card">
+        <div class="prop-prepared-label">Proposal Prepared For</div>
+        <div class="prop-prepared-name">${esc(p.clientName || '—')}</div>
+        ${p.clientCompany ? `<div class="prop-prepared-org">${esc(p.clientCompany)}${p.location ? ' · ' + esc(p.location) : ''}</div>` : ''}
+        <div class="prop-prepared-grid">
+          ${p.clientEmail ? `<div><b>Email</b>${esc(p.clientEmail)}</div>` : ''}
+          ${p.clientPhone ? `<div><b>Phone</b>${esc(p.clientPhone)}</div>` : ''}
+          ${p.eventDate ? `<div><b>Date</b>${fmtDate(p.eventDate)}</div>` : ''}
+          ${p.groupSize ? `<div><b>Scope</b>${esc(p.groupSize)}</div>` : ''}
         </div>
       </div>
-    </div>
 
-    <div class="container">
-      ${p.headerImage ? `<div class="prop-header-image"><img src="${esc(p.headerImage)}" alt=""></div>` : ''}
-
-      ${p.description ? `<div class="card"><h2 style="margin-bottom:10px;">Overview</h2><p style="color:var(--ink);white-space:pre-wrap;">${esc(p.description)}</p></div>` : ''}
-
-      ${(p.eventDate || p.location || p.groupSize) ? `
-        <div class="chips">
-          ${p.eventDate ? `<div class="chip"><b>Date</b>${fmtDate(p.eventDate)}</div>` : ''}
-          ${p.location ? `<div class="chip"><b>Location</b>${esc(p.location)}</div>` : ''}
-          ${p.groupSize ? `<div class="chip"><b>Scope</b>${esc(p.groupSize)}</div>` : ''}
-        </div>
+      ${p.description ? `
+        <section class="prop-section">
+          <div class="section-head">
+            <div class="eyebrow">The Experience</div>
+            <h2>Overview</h2>
+          </div>
+          <p class="prop-overview-text">${esc(p.description)}</p>
+        </section>
       ` : ''}
 
-      ${blocksHtml}
+      ${otherBlocksHtml}
+      ${mapBlockHtml}
 
-      <div class="card">
-        <h2 style="margin-bottom:4px;">Estimate</h2>
-        <div class="card-sub">Itemized project cost.</div>
-        <div class="items-wrap">
-          <div class="items-head" style="grid-template-columns:34px 1fr 70px 110px 110px;">
-            <div></div><div>Item</div><div>Qty</div><div>Unit price</div><div>Total</div>
+      <section class="prop-section" id="pricing">
+        <div class="section-head">
+          <div class="eyebrow">Pricing</div>
+          <h2>Investment Summary</h2>
+        </div>
+        <div class="pricing-table">
+          <div class="pricing-head">
+            <div>#</div><div>Item</div><div>Qty</div><div>Unit Price</div><div>Amount</div>
           </div>
           ${p.items.map((it, i) => `
-            <div class="item-row" style="grid-template-columns:34px 1fr 70px 110px 110px;">
-              <div class="item-num">${i+1}</div>
-              <div>${esc(it.desc || '—')}</div>
-              <div style="font-family:var(--font-mono);">${esc(it.qty)}</div>
-              <div style="font-family:var(--font-mono);">${fmtMoney(Number(it.price)||0)}</div>
-              <div class="item-total">${fmtMoney((Number(it.qty)||0)*(Number(it.price)||0))}</div>
+            <div class="pricing-row">
+              <div class="pricing-num">${i+1}</div>
+              <div class="pricing-desc">${esc(it.desc || '—')}</div>
+              <div class="pricing-qty">${esc(it.qty)}</div>
+              <div class="pricing-unit">${fmtMoney(Number(it.price)||0)}</div>
+              <div class="pricing-amt">${fmtMoney((Number(it.qty)||0)*(Number(it.price)||0))}</div>
             </div>
           `).join('')}
-          <div class="totals">
-            <div class="totals-row"><div class="tlabel">Subtotal</div><div class="tval">${fmtMoney(totals.subtotal)}</div></div>
-            ${Number(p.taxPercent) > 0 ? `<div class="totals-row"><div class="tlabel">Tax (${p.taxPercent}%)</div><div class="tval">${fmtMoney(totals.tax)}</div></div>` : ''}
-            <div class="totals-row grand"><div class="tlabel">Total</div><div class="tval">${fmtMoney(totals.total)}</div></div>
+          <div class="pricing-totals">
+            <div class="pricing-totals-row"><span>Subtotal</span><span>${fmtMoney(totals.subtotal)}</span></div>
+            ${Number(p.taxPercent) > 0 ? `<div class="pricing-totals-row"><span>Tax (${p.taxPercent}%)</span><span>${fmtMoney(totals.tax)}</span></div>` : ''}
+            <div class="pricing-totals-row grand"><span>Total</span><span>${fmtMoney(totals.total)}</span></div>
           </div>
         </div>
-      </div>
+        ${p.notes ? `<p class="prop-notes">${esc(p.notes)}</p>` : ''}
+      </section>
 
-      ${p.notes ? `<div class="card"><h2 style="font-size:15px;margin-bottom:8px;">Notes</h2><p style="color:var(--slate);font-size:13.5px;white-space:pre-wrap;">${esc(p.notes)}</p></div>` : ''}
-
-      <div class="accept-box no-print">
-        <div id="accept-status-text">
-          ${p.status === 'accepted' ? `<span class="accept-status">&check; Proposal accepted</span>` :
-            p.status === 'declined' ? `<span style="color:var(--danger);font-weight:700;">Proposal declined</span>` :
-            `<span style="color:var(--slate);">Ready to move forward?</span>`}
+      <section class="prop-section prop-accept-section no-print" id="accept">
+        <div class="section-head">
+          <div class="eyebrow">Final Step</div>
+          <h2>${isDecided ? (p.status === 'accepted' ? 'Proposal Accepted' : 'Proposal Declined') : 'Accept the Proposal'}</h2>
         </div>
-        <div class="btn-row" id="accept-actions">
-          <button class="btn btn-ghost" id="btn-print">Download PDF</button>
-          ${p.status !== 'accepted' && p.status !== 'declined' ? `
-            <button class="btn btn-ghost btn-danger" id="btn-decline">Decline</button>
-            <button class="btn btn-primary" id="btn-accept">Accept proposal</button>
-          ` : ''}
-        </div>
-      </div>
 
-      <div class="prop-footer">WLK Tours® · sales@wlktours.com · 855-WLKTOUR (855-955-8687)</div>
+        ${isDecided ? `
+          <div class="accept-decided ${p.status}">
+            ${p.status === 'accepted'
+              ? `&check; Accepted${p.acceptedByName ? ' by ' + esc(p.acceptedByName) : ''}${p.acceptedByEmail ? ' (' + esc(p.acceptedByEmail) + ')' : ''}`
+              : 'This proposal was declined.'}
+          </div>
+        ` : `
+          <p class="accept-intro">Enter your name and email, then click Accept to confirm this proposal${p.clientCompany ? ' for ' + esc(p.clientCompany) : ''}. Our team will follow up within one business day.</p>
+          <div class="accept-form">
+            <div class="grid2">
+              <div class="field"><label>Your name</label><input type="text" id="accept-name" placeholder="Jane Doe"></div>
+              <div class="field"><label>Your email</label><input type="email" id="accept-email" placeholder="jane@example.com"></div>
+            </div>
+            <div id="accept-error" class="error-note" style="display:none;"></div>
+            <div class="btn-row" style="margin-top:6px;">
+              <button class="btn btn-primary" id="btn-accept">Accept Proposal</button>
+              <button class="btn btn-ghost btn-danger" id="btn-decline">Decline</button>
+              <button class="btn btn-ghost" id="btn-print">Download PDF</button>
+            </div>
+          </div>
+        `}
+
+        <div class="prop-contact-row">
+          <div><b>Questions?</b> sales@wlktours.com</div>
+          <div><b>Telephone</b> 855-WLKTOUR (855-955-8687)</div>
+        </div>
+      </section>
     </div>
+
+    <footer class="prop-footer">
+      <div class="brand-mark">WLK<span>TOURS</span></div>
+      <div>© ${new Date().getFullYear()} WLK Tours. All rights reserved.</div>
+    </footer>
   `;
 
-  document.getElementById('btn-print').addEventListener('click', () => window.print());
+  const printBtn = document.getElementById('btn-print');
+  if(printBtn) printBtn.addEventListener('click', () => window.print());
+
   const acceptBtn = document.getElementById('btn-accept');
   const declineBtn = document.getElementById('btn-decline');
   if(acceptBtn) acceptBtn.addEventListener('click', () => respond('accepted'));
   if(declineBtn) declineBtn.addEventListener('click', () => respond('declined'));
 }
 
+function truncate(str, len){
+  if(!str) return '';
+  return str.length > len ? str.slice(0, len).trim() + '…' : str;
+}
+
 async function respond(status){
+  const errEl = document.getElementById('accept-error');
+  let payload = { status };
+  if(status === 'accepted'){
+    const name = document.getElementById('accept-name').value.trim();
+    const email = document.getElementById('accept-email').value.trim();
+    if(!name || !email){
+      errEl.textContent = 'Please enter your name and email to accept.';
+      errEl.style.display = 'block';
+      return;
+    }
+    payload.name = name;
+    payload.email = email;
+  }
   try{
-    await api('POST', '/api/proposals/public/' + PROPOSAL_ID + '/respond', { status });
-    PROPOSAL.status = status;
+    await api('POST', '/api/proposals/public/' + PROPOSAL_ID + '/respond', payload);
+    const updated = await api('GET', '/api/proposals/public/' + PROPOSAL_ID);
+    PROPOSAL = updated;
     showToast(status === 'accepted' ? 'Thanks — proposal accepted!' : 'Response recorded.');
     paint();
+    document.getElementById('accept').scrollIntoView({ behavior: 'smooth' });
   }catch(err){
-    showToast(err.message);
+    if(errEl){ errEl.textContent = err.message; errEl.style.display = 'block'; }
+    else showToast(err.message);
   }
 }
 
